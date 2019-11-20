@@ -72,7 +72,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
             it('rejects insufficient balances', async () => {
                 let invalidAmount;
                 invalidAmount = tokens(100000000); // Greater than the total supply of tokens
-                await token.transfer(receiver, invalidAmount, { from: deployer }).should.be.rejectedWith(EVM_REVERT)
+                await token.transfer(receiver, invalidAmount, { from: deployer }).should.be.rejectedWith(EVM_REVERT);
 
                 invalidAmount = tokens(10); // user doesn't have any tokens
                 await token.transfer(deployer, invalidAmount, { from: receiver }).should.be.rejectedWith(EVM_REVERT);
