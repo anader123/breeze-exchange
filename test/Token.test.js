@@ -47,7 +47,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         describe('success', async () => {
             beforeEach(async () => {
                 amount = tokens(100);
-                result = await token.transfer(receiver, tokens(100), { from: deployer });
+                result = await token.transfer(receiver, amount, { from: deployer });
             });
             
             it('transfers tokens', async () => {
@@ -55,7 +55,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 balanceOf = await token.balanceOf(deployer);
                 balanceOf.toString().should.equal(tokens(9900).toString());
                 balanceOf = await token.balanceOf(receiver);
-                balanceOf.toString().should.equal(tokens(100).toString());
+                balanceOf.toString().should.equal(amount.toString());
             });
     
             it('emits a transfer event', async () => {
@@ -99,7 +99,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
             log.event.should.equal('Approval');
             const event = log.args;
             event.owner.toString().should.equal(deployer, "owner is correct");
-            event.spender.toString().should.equal(exchange, "value is correct");
+            event.spender.toString().should.equal(exchange, "spender is correct");
             event.value.toString().should.equal(amount.toString(), "value is corret");
         });
     });
@@ -115,7 +115,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
         describe('success', async () => {
             beforeEach(async () => {
-                result = await token.transferFrom(deployer, receiver, tokens(100), { from: exchange });
+                result = await token.transferFrom(deployer, receiver, amount, { from: exchange });
             });
             
             it('transfers tokens', async () => {
@@ -123,7 +123,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 balanceOf = await token.balanceOf(deployer);
                 balanceOf.toString().should.equal(tokens(9900).toString());
                 balanceOf = await token.balanceOf(receiver);
-                balanceOf.toString().should.equal(tokens(100).toString());
+                balanceOf.toString().should.equal(amount.toString());
             });
 
             it('resets the allowance', async () => {
