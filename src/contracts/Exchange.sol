@@ -15,12 +15,14 @@ contract Exchange {
     mapping(address => mapping(address => uint)) public tokens;
     mapping(uint => _Order) public orders;
     mapping(uint => bool) public orderCancelled;
+    mapping(uint => bool) public orderFilled;
 
     // Events
     event Deposit(address indexed token, address indexed user, uint amount, uint balance);
     event Withdraw(address indexed token, address indexed user, uint amount, uint balance);
     event Order(uint id, address user, address tokenGet, uint amountGet, address tokenGive, uint amountGive, uint timestamp);
     event Cancel(uint id, address user, address tokenGet, uint amountGet, address tokenGive, uint amountGive, uint timestamp);
+    event Trade(uint id, address user, address tokenGet, uint amountGet, address tokenGive, uint amountGive, address userFill, uint timestamp);
 
     // Structs
     struct _Order {
@@ -88,4 +90,24 @@ contract Exchange {
         emit Cancel(_id, msg.sender, _order.tokenGet, _order.amountGet, _order.tokenGive, _order.amountGive, now);
     }
 
+    function fillOrder(uint _id) public {
+        require(_id > 0 && _id <= orderCount);
+        require(!orderFilled[_id]);
+        require(!orderCancelled[_id]);
+        _Order storage _order = orders[_id];
+        _trade(_order.id, _order.user, _order.tokenGet, _order.amountGet, _order.tokenGive, _order.amountGive);
+        orderFilled[_order.id] = true;
+    }
+
+    function _trade(uint _orderId, address _user, address _tokenGet, uint _amountGet, address _tokenGive, uint _amountGive) internal {
+        uint _feeAmount = _amountGet.mul(feePercent).div(100);
+
+        tokens[_tokenGet][msg.sender] = tokens[_tokenGet][msg.sender].sub(_amountGet.add(_feeAmount));
+        tokens[_tokenGet][_user] = tokens[_tokenGet][_user].add(_amountGet);
+
+        tokens[_tokenGet][feeAccount] = tokens[_tokenGet][feeAccount].add(_feeAmount); // Collects Fees
+        tokens[_tokenGive][_user] = tokens[_tokenGive][_user].sub(_amountGive);
+        tokens[_tokenGive][msg.sender] = tokens[_tokenGive][msg.sender].add(_amountGive);
+        emit Trade(_orderId, _user, _tokenGet, _amountGet, _tokenGive, _amountGive, msg.sender, now);
+    }
 }
