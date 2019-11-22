@@ -27,7 +27,7 @@ export const loadToken = async (web3, networkId, dispatch) => {
         dispatch(tokenLoaded(tokenContract));
         return tokenContract;
     } catch(error) {
-        window.alert('Contract not deployed to the current nework.');
+        console.log('Contract not deployed to the current nework.');
         return null;
     }
 };
@@ -38,7 +38,7 @@ export const loadExchange = async (web3, networkId, dispatch) => {
         dispatch(exchangeLoaded(exchangeContract));
         return exchangeContract;
     } catch(error) {
-        window.alert('Contract not deployed to the current nework.');
+        console.log('Contract not deployed to the current nework.');
         return null;
     }
 };

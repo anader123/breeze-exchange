@@ -1,27 +1,34 @@
-export function web3Loaded(connection) {
+function web3Loaded(connection) {
     return {
         type: 'WEB3_LOADED',
         connection
     };
 };
 
-export function web3AccountLoaded(account) {
+function web3AccountLoaded(account) {
     return {
         type: 'WEB3_ACCOUNT_LOADED',
         account
     };
 };
 
-export function tokenLoaded(contract) {
+function tokenLoaded(contract) {
     return {
         type: 'TOKEN_LOADED',
         contract
     };
 };
 
-export function exchangeLoaded(contract) {
+function exchangeLoaded(contract) {
     return {
         type: 'EXCHANGE_LOADED',
         contract
     };
 };
+
+module.exports = {
+    web3Loaded,
+    web3AccountLoaded,
+    tokenLoaded,
+    exchangeLoaded
+}
