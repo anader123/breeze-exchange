@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 class Navbar extends Component {
     render() {
+        const { account } = this.props;
         return (
             <div>
                 <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -15,11 +16,11 @@ class Navbar extends Component {
                         <ul className="navbar-nav ml-auto">
                         <li className="nav-item">
                             <a className="nav-link small" 
-                                href={`https://etherscan.io/address/${this.props.account}`}
+                                href={`https://etherscan.io/address/${account}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                {this.props.account}
+                                {account}
                             </a>
                         </li>
                         {/* <li className="nav-item">

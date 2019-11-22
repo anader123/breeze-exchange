@@ -26,9 +26,33 @@ function exchangeLoaded(contract) {
     };
 };
 
+function cancelledOrdersLoaded(cancelledOrders) {
+    return {
+        type: 'CANCELLED_ORDERS_LOADED',
+        cancelledOrders
+    };
+};
+
+function filledOrdersLoaded(filledOrders) {
+    return {
+        type: 'FILLED_ORDERS_LOADED',
+        filledOrders
+    };
+};
+
+function allOrdersLoaded(allOrders) {
+    return {
+        type: 'ALL_ORDERS_LOADED',
+        allOrders
+    };
+};
+
 module.exports = {
     web3Loaded,
     web3AccountLoaded,
     tokenLoaded,
-    exchangeLoaded
+    exchangeLoaded,
+    cancelledOrdersLoaded,
+    filledOrdersLoaded,
+    allOrdersLoaded
 }

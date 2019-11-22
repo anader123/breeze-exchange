@@ -3,7 +3,10 @@ import {
     web3Loaded,
     web3AccountLoaded,
     tokenLoaded,
-    exchangeLoaded
+    exchangeLoaded,
+    cancelledOrdersLoaded,
+    filledOrdersLoaded,
+    allOrdersLoaded
 } from './actions';
 import Token from '../abis/Token.json';
 import Exchange from '../abis/Exchange.json';
@@ -41,4 +44,22 @@ export const loadExchange = async (web3, networkId, dispatch) => {
         console.log('Contract not deployed to the current nework.');
         return null;
     }
+};
+
+export const loadAllOrders = async (exchangeContract, dispatch) => {
+    // Cancelled Orders
+    const cancelStream = await exchangeContract.getPastEvents('Cancel', { fromBlock: 0, toBlock: 'latest' });
+    const cancelledOrders = cancelStream.map(event => event.returnValues);
+    dispatch(cancelledOrdersLoaded(cancelledOrders));
+
+    // Filled Orders
+    const tradeStream = await exchangeContract.getPastEvents('Trade', { fromBlock: 0, toBlock: 'latest' });
+    const filledOrders = tradeStream.map(event => event.returnValues);
+    dispatch(filledOrdersLoaded(filledOrders));
+
+    // All Orders
+    const orderStream = await exchangeContract.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest'});
+    const allOrders = orderStream.map(event => event.returnValues);
+    console.log('hit')
+    dispatch(allOrdersLoaded(allOrders));
 };
