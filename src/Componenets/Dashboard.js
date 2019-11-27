@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
 import { accountSelector, exchangeContractSelector } from '../redux/selectors';
 import { connect } from 'react-redux';
-import { loadAllOrders } from '../redux/interactions';
+import { loadAllOrders, subscribeToEvents } from '../redux/interactions';
 
 // Components
 import Trades from './Trades';
 import OrderBook from './OrderBook';
 import UserTransactions from './UserTransactions';
+import PriceChart from './PriceChart';
+import Balance from './Balance';
 
 class Dashboard extends Component {
     componentWillMount() {
-        this.loadBlockchainData(this.props.dispatch);
+        this.loadBlockchainData();
     };
 
-    async loadBlockchainData(dispatch) {
-        await loadAllOrders(this.props.exchangeContract, dispatch);
+    async loadBlockchainData() {
+        const { exchangeContract, dispatch } = this.props;
+        await loadAllOrders(exchangeContract, dispatch);
+        await subscribeToEvents(exchangeContract, dispatch)
     };
 
     render() {
@@ -22,15 +26,7 @@ class Dashboard extends Component {
             <div>
                 <div className="content">
                     <div className="vertical-split">
-                        <div className="card bg-dark text-white">
-                        <div className="card-header">
-                            Card Title
-                        </div>
-                        <div className="card-body">
-                            <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="/#" className="card-link">Card link</a>
-                        </div>
-                        </div>
+                        <Balance />
                         <div className="card bg-dark text-white">
                         <div className="card-header">
                             Card Title
@@ -43,25 +39,8 @@ class Dashboard extends Component {
                     </div>
                     <OrderBook />
                     <div className="vertical-split">
-                        <div className="card bg-dark text-white">
-                        <div className="card-header">
-                            Card Title
-                        </div>
-                        <div className="card-body">
-                            <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="/#" className="card-link">Card link</a>
-                        </div>
-                        </div>
+                        <PriceChart />
                         <UserTransactions />
-                        {/* <div className="card bg-dark text-white">
-                        <div className="card-header">
-                            Card Title
-                        </div>
-                        <div className="card-body">
-                            <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="/#" className="card-link">Card link</a>
-                        </div>
-                        </div> */}
                     </div>
                     <Trades />
                 </div>

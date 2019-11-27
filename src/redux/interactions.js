@@ -6,10 +6,21 @@ import {
     exchangeLoaded,
     cancelledOrdersLoaded,
     filledOrdersLoaded,
-    allOrdersLoaded
+    allOrdersLoaded,
+    orderCancelling,
+    orderCancelled,
+    orderFilling,
+    orderFilled,
+    etherBalanceLoaded,
+    tokenBalanceLoaded,
+    exchangeEtherBalanceLoaded,
+    exchangeTokenBalanceLoaded,
+    balancesLoaded,
+    balancesLoading
 } from './actions';
 import Token from '../abis/Token.json';
 import Exchange from '../abis/Exchange.json';
+import { ETHER_ADDRESS } from '../helpers';
 
 export const loadWeb3 = (dispatch) => {
     const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545');
@@ -60,6 +71,110 @@ export const loadAllOrders = async (exchangeContract, dispatch) => {
     // All Orders
     const orderStream = await exchangeContract.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest'});
     const allOrders = orderStream.map(event => event.returnValues);
-    console.log('hit')
     dispatch(allOrdersLoaded(allOrders));
+};
+
+export const subscribeToEvents = async (exchangeContract, dispatch) => {
+    exchangeContract.events.Cancel({}, (error, event) => {
+        dispatch(orderCancelled(event.returnValues));
+    });
+    exchangeContract.events.Trade({}, (error, event) => {
+        dispatch(orderFilled(event.returnValues));
+    });
+    exchangeContract.events.Deposit({}, (error, event) => {
+        dispatch(balancesLoaded());
+    });
+    exchangeContract.events.Withdraw({}, (error, event) => {
+        dispatch(balancesLoaded());
+    });
+};
+
+export const cancelOrder = (dispatch, exchangeContract, order, account) => {
+    exchangeContract.methods.cancelOrder(order.id).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(orderCancelling())
+    })
+    .on('error', (error => {
+        console.log(error);
+        window.alert('There was an error!')
+    }))
+};
+
+export const fillOrder = (dispatch, exchangeContract, order, account) => {
+    exchangeContract.methods.fillOrder(order.id).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(orderFilling())
+    })
+    .on('error', (error => {
+        console.log(error);
+        window.alert('There was an error!')
+    }))
+};
+
+export const loadBalances = async (dispatch, web3, exchangeContract, tokenContract, account) => {
+    const etherBalance = await web3.eth.getBalance(account);
+    dispatch(etherBalanceLoaded(etherBalance));
+
+    const tokenBalance = await tokenContract.methods.balanceOf(account).call();
+    dispatch(tokenBalanceLoaded(tokenBalance));
+
+    const exchangeEtherBalance = await exchangeContract.methods.balanceOf(ETHER_ADDRESS, account).call();
+    dispatch(exchangeEtherBalanceLoaded(exchangeEtherBalance));
+
+    const exchangeTokenBalance = await exchangeContract.methods.balanceOf(tokenContract.options.address, account).call();
+    dispatch(exchangeTokenBalanceLoaded(exchangeTokenBalance));
+
+    dispatch(balancesLoaded());
+};
+
+export const depositEther = (dispatch, exchangeContract, web3, amount, account ) => {
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    exchangeContract.methods.depositEther.send({ from: account, value: weiAmount })
+    .on('transactionHash', (hash) => {
+        dispatch(balancesLoading());
+    })
+    .on('error', error => {
+        console.log(error);
+        window.alert('There was an error');
+    })
+};
+
+export const withdrawEther = (dispatch, exchangeContract, web3, amount, account ) => {
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    exchangeContract.methods.withdrawEther(weiAmount).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(balancesLoading());
+    })
+    .on('error', error => {
+        console.log(error);
+        window.alert('There was an error');
+    })
+};
+
+export const depositToken = (dispatch, exchangeContract, web3, tokenContract, amount, account ) => {
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    tokenContract.methods.approve(exchangeContract.options.address, weiAmount).send({ from: account })
+    .on('transactionHash', (hash) => {
+        exchangeContract.methods.depositToken(tokenContract.options.address, weiAmount).send({ from: account })
+        .on('transactionHash', (hash) => {
+            dispatch(balancesLoading());
+        })
+    })
+    .on('error', error => {
+        console.log(error);
+        window.alert('There was an error');
+    })
+};
+
+export const withdrawToken = (dispatch, exchangeContract, web3, tokenContract, amount, account ) => {
+    const tokenContractAddress = tokenContract.options.address;
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    exchangeContract.methods.withdrawToken(tokenContractAddress, weiAmount).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(balancesLoading());
+    })
+    .on('error', error => {
+        console.log(error);
+        window.alert('There was an error');
+    })
 };

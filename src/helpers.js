@@ -13,10 +13,17 @@ const tokens = ether;
 const GREEN = 'success';
 const RED = 'danger';
 
+const formatBalance = (balance) => {
+    balance = ether(balance);
+    balance = Math.round(balance * 100) / 100;
+    return balance;
+};
+
 module.exports = {
     ether,
     tokens,
     ETHER_ADDRESS,
     GREEN,
-    RED
+    RED,
+    formatBalance
 };

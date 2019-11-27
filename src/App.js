@@ -44,7 +44,6 @@ class App extends Component {
 };
 
 function mapStateToProps(state) {
-  console.log(contractsLoadedSelector(state))
   return {
     contractsLoaded: contractsLoadedSelector(state)
   }

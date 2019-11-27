@@ -3,16 +3,36 @@ import { connect } from 'react-redux';
 import Spinner from './Spinner';
 import {
     orderBookSelector,
-    orderBookLoadedSelector
+    orderBookLoadedSelector,
+    exchangeContractSelector,
+    accountSelector,
+    orderFillingSelector
 } from '../redux/selectors';
+import { fillOrder } from '../redux/interactions';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-const renderOrder = (order) => {
+const renderOrder = (order, props) => {
+    const { dispatch, exchangeContract, account } = props;
     return(
-        <tr key={order.id}>
-            <td>{order.tokenAmount}</td>
-            <td className={`text-${order.orderTypeClass}`}>{order.tokenPrice}</td>
-            <td>{order.etherAmount}</td>
-        </tr>
+        <OverlayTrigger
+            key={order.id}
+            placement='auto'
+            overlay={
+                <Tooltip id={order.id}>
+                    {`Click here to ${order.orderFillAction}`}
+                </Tooltip>
+            }
+        >
+            <tr 
+                key={order.id}
+                className='order-book-order'
+                onClick={e => fillOrder(dispatch, exchangeContract, order, account)}
+            >
+                <td>{order.tokenAmount}</td>
+                <td className={`text-${order.orderTypeClass}`}>{order.tokenPrice}</td>
+                <td>{order.etherAmount}</td>
+            </tr>
+        </OverlayTrigger>
     )
 }
 
@@ -52,9 +72,13 @@ class OrderBook extends Component {
 };
 
 function mapStateToProps(state) {
+    const orderBookLoad = orderBookLoadedSelector(state);
+    const orderFilling = orderFillingSelector(state);
     return {
         orderBook: orderBookSelector(state),
-        orderBookLoaded: orderBookLoadedSelector(state)
+        orderBookLoaded: orderBookLoad && !orderFilling,
+        exchangeContract: exchangeContractSelector(state),
+        account: accountSelector(state)
     }
 };
 

@@ -5,14 +5,19 @@ import {
     userFilledOrdersLoadedSelector,
     userFilledOrdersSelector,
     userOpenOrdersLoadedSelector,
-    userOpenOrdersSelector
+    userOpenOrdersSelector,
+    exchangeContractSelector,
+    accountSelector,
+    orderCancellingSelector
 } from '../redux/selectors';
+import { cancelOrder } from '../redux/interactions';
 import Spinner from './Spinner';
 
-const showUserFilledOrders = (userfilledOrders) => {
+const showUserFilledOrders = (props) => {
+    const { userFilledOrders } = props;
     return(
         <tbody>
-            { userfilledOrders.map(order => {
+            { userFilledOrders.map(order => {
                 return(
                     <tr key={order.id}>
                         <td className='text-muted'>{order.formattedTimestamp}</td>
@@ -25,15 +30,21 @@ const showUserFilledOrders = (userfilledOrders) => {
     )
 };
 
-const showUserOpenOrders = (userfilledOrders) => {
+const showUserOpenOrders = (props) => {
+    const { userOpenOrders, dispatch, exchangeContract, account } = props;
     return(
         <tbody>
-            { userfilledOrders.map(order => {
+            { userOpenOrders.map(order => {
                 return(
                     <tr key={order.id}>
                         <td className='text-muted'>{order.formattedTimestamp}</td>
                         <td className={`text-${order.orderTypeClass}`} >{order.orderSign}{order.tokenAmount}</td>
-                        <td className='text-muted' >x</td>
+                        <td 
+                            className='text-muted cancel-order'
+                            onClick={(e) => {
+                                cancelOrder(dispatch, exchangeContract, order, account)
+                            }}
+                        >X</td>
                     </tr>
                 )
             })}
@@ -43,7 +54,7 @@ const showUserOpenOrders = (userfilledOrders) => {
 
 class UserTransactions extends Component {
     render() {
-        const { userFilledOrdersLoaded, userOpenOrdersLoaded, userFilledOrders, userOpenOrders } = this.props;
+        const { userFilledOrdersLoaded, showingOpenOrdersLoaded } = this.props;
         return (
             <div className="card bg-dark text-white">
                 <div className="card-header">
@@ -60,7 +71,7 @@ class UserTransactions extends Component {
                                         <th>MEME/ETH</th>
                                     </tr>
                                 </thead>
-                                {userFilledOrdersLoaded ? showUserFilledOrders(userFilledOrders) : <Spinner type='table' />}
+                                {userFilledOrdersLoaded ? showUserFilledOrders(this.props) : <Spinner type='table' />}
                             </table>
                         </Tab>
                         <Tab eventKey='orders' title='Orders'>
@@ -72,7 +83,7 @@ class UserTransactions extends Component {
                                         <th>Cancel</th>
                                     </tr>
                                 </thead>
-                                {userOpenOrdersLoaded ? showUserOpenOrders(userOpenOrders) : <Spinner type='table' />}
+                                {showingOpenOrdersLoaded ? showUserOpenOrders(this.props) : <Spinner type='table' />}
                             </table>
                         </Tab>
                     </Tabs>
@@ -83,11 +94,16 @@ class UserTransactions extends Component {
 };
 
 function mapStateToProps(state) {
+    const userOpenOrdersLoaded = userOpenOrdersLoadedSelector(state);
+    const orderCancelling = orderCancellingSelector(state);
+    
     return {
         userFilledOrders: userFilledOrdersSelector(state),
         userFilledOrdersLoaded: userFilledOrdersLoadedSelector(state),
         userOpenOrders: userOpenOrdersSelector(state),
-        userOpenOrdersLoaded: userOpenOrdersLoadedSelector(state)
+        showingOpenOrdersLoaded: userOpenOrdersLoaded && !orderCancelling,
+        exchangeContract: exchangeContractSelector(state),
+        account: accountSelector(state)
     }
 };
 
