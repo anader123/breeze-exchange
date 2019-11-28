@@ -37,8 +37,8 @@ const showUserOpenOrders = (props) => {
             { userOpenOrders.map(order => {
                 return(
                     <tr key={order.id}>
-                        <td className='text-muted'>{order.formattedTimestamp}</td>
                         <td className={`text-${order.orderTypeClass}`} >{order.orderSign}{order.tokenAmount}</td>
+                        <td className={`text-${order.orderTypeClass}`} >{order.orderSign}{order.tokenPrice}</td>
                         <td 
                             className='text-muted cancel-order'
                             onClick={(e) => {

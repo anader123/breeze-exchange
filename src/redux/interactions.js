@@ -16,7 +16,10 @@ import {
     exchangeEtherBalanceLoaded,
     exchangeTokenBalanceLoaded,
     balancesLoaded,
-    balancesLoading
+    balancesLoading,
+    buyOrderMaking,
+    sellOrderMaking,
+    orderMade
 } from './actions';
 import Token from '../abis/Token.json';
 import Exchange from '../abis/Exchange.json';
@@ -71,6 +74,7 @@ export const loadAllOrders = async (exchangeContract, dispatch) => {
     // All Orders
     const orderStream = await exchangeContract.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest'});
     const allOrders = orderStream.map(event => event.returnValues);
+    console.log(allOrders, 'allOrders')
     dispatch(allOrdersLoaded(allOrders));
 };
 
@@ -86,6 +90,9 @@ export const subscribeToEvents = async (exchangeContract, dispatch) => {
     });
     exchangeContract.events.Withdraw({}, (error, event) => {
         dispatch(balancesLoaded());
+    });
+    exchangeContract.events.Order({}, (error, event) => {
+        dispatch(orderMade(event.returnValues));
     });
 };
 
@@ -176,5 +183,38 @@ export const withdrawToken = (dispatch, exchangeContract, web3, tokenContract, a
     .on('error', error => {
         console.log(error);
         window.alert('There was an error');
+    })
+};
+
+export const makeBuyOrder = (dispatch, exchangeContract, tokenContract, web3, order, account) => {
+    console.log(order)
+    const tokenGet = tokenContract.options.address;
+    const amountGet = web3.utils.toWei(order.amount, 'ether');
+    const tokenGive = ETHER_ADDRESS;
+    const amountGive = web3.utils.toWei((order.amount * order.price).toString(), 'ether');
+
+    exchangeContract.methods.makeOrder(tokenGet, amountGet, tokenGive, amountGive).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(buyOrderMaking())
+    })
+    .on('error', (error) => {
+        console.log(error);
+        window.alert('There was an error')
+    })
+};
+
+export const makeSellOrder = (dispatch, exchangeContract, tokenContract, web3, order, account) => {
+    const tokenGet = ETHER_ADDRESS;
+    const amountGet = web3.utils.toWei((order.amount * order.price).toString(), 'ether');
+    const tokenGive = tokenContract.options.address;
+    const amountGive = web3.utils.toWei(order.amount, 'ether');
+
+    exchangeContract.methods.makeOrder(tokenGet, amountGet, tokenGive, amountGive).send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(sellOrderMaking())
+    })
+    .on('error', (error) => {
+        console.log(error);
+        window.alert('There was an error')
     })
 };
