@@ -11,7 +11,12 @@ flex-wrap: nowrap;
 align-items: stretch;
 justify-content: space-evenly;
 padding: 8px;
-z-index: 1
+z-index: 1;
+}
+
+.connect-wallet {
+    color: white;
+    margin-top: 2em;
 }
 
 .content > div {

@@ -82,7 +82,6 @@ function exchange(state = {}, action) {
     case 'BUY_ORDER_MAKING': 
       return { ...state, buyOrder: { ...state.buyOrder, amount: null, price: null, making: true }}
     case 'ORDER_MADE':
-      console.log(state)
       index = state.allOrders.data.findIndex(order => order.id === action.order.id);
 
       if(index === -1) {

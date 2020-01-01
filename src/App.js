@@ -9,15 +9,19 @@ import Navbar from './Componenets/Navbar';
 import Dashboard from './Componenets/Dashboard';
 
 class App extends Component {
-  componentWillMount() {
-    this.loadBlockchainData(this.props.dispatch);
-  }; 
+  constructor() {
+    super();
 
-  async loadBlockchainData(dispatch) {
+    this.state = {
+      walletConnected: false
+    }
+  }
+  loadBlockchainData = async (dispatch) => {
     await window.ethereum.enable();
     const web3 = loadWeb3(dispatch);
     const account = loadAccount(web3, dispatch);
     const networkId = await web3.eth.net.getId();
+    this.setState({walletConnected: true});
 
     // Initialzing Contracts
     const tokenContract = await loadToken(web3, networkId, dispatch);
@@ -34,10 +38,14 @@ class App extends Component {
 
   render() {
     const { contractsLoaded } = this.props;
+    const { walletConnected } = this.state;
     return (
       <div>
-        <Navbar/>
-        {contractsLoaded ? <Dashboard/> : <div className="content" />}
+        <Navbar walletConnected={walletConnected} loadBlockchainData={this.loadBlockchainData}/>
+        {contractsLoaded ? <Dashboard/> : 
+          <div className="content">
+            <div className='connect-wallet'>Please connect your wallet to use the exchange.</div>
+          </div>}
       </div>
     );
   }
