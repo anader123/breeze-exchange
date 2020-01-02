@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { accountSelector } from '../redux/selectors';
 import { connect } from 'react-redux';
+import windPhoto from '../../src/wind-icon.png';
 
 class Navbar extends Component {
     render() {
@@ -12,7 +13,7 @@ class Navbar extends Component {
                         href="https://github.com/anader123/breeze-exchange" 
                         target="_blank" 
                         rel="noopener noreferrer">Breeze Exchange</a>
-        
+                    <img className='wind-img' alt='wind' src={windPhoto} />
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -24,7 +25,7 @@ class Navbar extends Component {
                         :
                         <li className="nav-item">
                             <a className="nav-link small" 
-                                href={`https://etherscan.io/address/${account}`}
+                                href={`https://ropsten.etherscan.io/address/${account}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

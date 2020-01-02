@@ -17,23 +17,27 @@ class App extends Component {
     }
   }
   loadBlockchainData = async (dispatch) => {
-    await window.ethereum.enable();
-    const web3 = loadWeb3(dispatch);
-    const account = loadAccount(web3, dispatch);
-    const networkId = await web3.eth.net.getId();
-    this.setState({walletConnected: true});
+    if(window.ethereum) {
+      await window.ethereum.enable();
+      const web3 = loadWeb3(dispatch);
+      const account = loadAccount(web3, dispatch);
+      const networkId = await web3.eth.net.getId();
+      this.setState({walletConnected: true});
 
-    // Initialzing Contracts
-    const tokenContract = await loadToken(web3, networkId, dispatch);
-    const exchangeContract = await loadExchange(web3, networkId, dispatch);
+      // Initialzing Contracts
+      const tokenContract = await loadToken(web3, networkId, dispatch);
+      const exchangeContract = await loadExchange(web3, networkId, dispatch);
 
-    if(!tokenContract) {
-      window.alert('Token smart not detected on the current network')
-    };
-    if(!exchangeContract) {
-      window.alert('Token smart not detected on the current network')
-    };
-    
+      if(!tokenContract) {
+        window.alert('Token Contract not detected on the current network')
+      };
+      if(!exchangeContract) {
+        window.alert('Exchange Contract not detected on the current network')
+      };
+    }
+    else {
+      window.alert('No wallet found')
+    }
   };
 
   render() {

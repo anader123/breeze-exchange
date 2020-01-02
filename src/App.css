@@ -17,6 +17,7 @@ z-index: 1;
 .connect-wallet {
     color: white;
     margin-top: 2em;
+    width: 50vw;
 }
 
 .content > div {
@@ -156,4 +157,10 @@ cursor: pointer;
 
 tr.order-book-order {
 cursor: pointer;
+}
+
+.wind-img {
+    color: white;
+    height: 2.5em;
+    width: auto;
 }
